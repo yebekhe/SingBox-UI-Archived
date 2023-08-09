@@ -19,5 +19,5 @@ jobs:
 
     - uses: actions/upload-artifact@v2
       with:
-        name: name-of-artifact
+        name: Singbox-UI
         path: src/dist/windows
