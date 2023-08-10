@@ -36,12 +36,7 @@ SingBoxUI is a graphical user interface application that allows users to connect
 
 ## Configuration
 
-- Local Config File: Create a `config.ini` file in the same folder as the `SingboxUI.exe` file to use custom configurations. The file should have the following structure:
-
-```
-[Text]
-Value = <subscription link>
-```
+- Local Config File: Put a `config.json` file in the same folder as the `SingboxUI.exe` file to use custom configurations.
 
 ## Additional Notes
 
