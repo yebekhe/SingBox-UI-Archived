@@ -21,9 +21,9 @@ SingBoxUI is a graphical user interface application that allows users to connect
 
 ## Getting Started
 
-1. Download Latest release from (here)[https://github.com/yebekhe/SingBox-UI/releases/latest].
+1. Download Latest release from [here](https://github.com/yebekhe/SingBox-UI/releases/latest).
 2. Extarct the compressed file and Run SingboxUI.exe.
-1. Check (Usage)[https://github.com/yebekhe/SingBox-UI/edit/main/README.md#getting-started] for more instructions .
+1. Check [Usage](https://github.com/yebekhe/SingBox-UI/edit/main/README.md#getting-started) for more instructions .
 
 ## Usage
 
