@@ -13,6 +13,8 @@ import json
 import time
 import webbrowser
 import requests
+import psutil
+
 def is_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
@@ -21,7 +23,7 @@ def is_admin():
 class SingBoxWindow(QMainWindow):
     def show_servers(self, _):
         # Fetching the data
-        r = requests.get("http://127.0.0.1:9090/proxies")
+        r = requests.get("http://127.0.0.1:9090/proxies", headers={"Authorization": f"Bearer {self.bearer_textbox.text()}"})
         whole = json.loads(r.text)
         proxies = whole['proxies']
 
@@ -69,16 +71,24 @@ class SingBoxWindow(QMainWindow):
         # Show the dialog window
         new_dialog.show()
         new_dialog.exec()
-
-
-
     def __init__(self):
+        for proc in psutil.process_iter(['pid', 'name']):
+            # TERMINATE SING-BOX.EXE IF IT IS RUNNING
+            if proc.info['name'] == 'sing-box.exe':
+                try:
+                    process = psutil.Process(proc.info['pid']) 
+                    process.terminate()  
+                except psutil.NoSuchProcess:
+                    print(f"No such process: {proc.info['pid']} ({proc.info['name']})")
+                else:
+                    print(f"Process {proc.info['pid']} ({proc.info['name']}) terminated.")
         super(SingBoxWindow, self).__init__()
-        self.process = QProcess(self)
-        self.process.start('sing-box.exe', ['run'])
         self.refresh_button = QPushButton('Refresh', self)  # Add this line
-
         # Create widgets
+        self.bearer_label = QLabel("Secret: ", self)
+        self.bearer_textbox = QLineEdit(self)
+        self.bearer_textbox.setText("YeBeKhe - UI: Aleph")
+
         self.label = QLabel("SUBSCRIPTION LINK: ", self)
         self.text_box = QLineEdit(self)
         self.checkbox = QCheckBox("USE LOCAL CONFIG", self)
@@ -123,7 +133,7 @@ class SingBoxWindow(QMainWindow):
             msg = QMessageBox()
             msg.setIcon(QIcon('icon.ico'))
             msg.setText("There is a problem with fetching your subscription link!\nCheck your internet connection!")
-            msg.setWindowTitle("Sing-Box - YeBeKhe: ERROR!")
+            msg.setWindowTitle("Sing-Box - YeBeKhe - UI: Aleph: ERROR!")
             msg.exec()
             return False
 
@@ -167,7 +177,7 @@ class SingBoxWindow(QMainWindow):
                     msg.setIcon(QMessageBox.Icon.Critical)
                     msg.setText("There is no Local config.json file in application folder!")
                     msg.setWindowTitle("File Not Found Error")
-                    msg.setWindowTitle("Sing-Box - YeBeKhe: ERROR!")
+                    msg.setWindowTitle("Sing-Box - YeBeKhe - UI: Aleph: ERROR!")
                     msg.setWindowIcon(QIcon('icon.ico'))                
                     msg.exec()
                     return False
@@ -178,23 +188,33 @@ class SingBoxWindow(QMainWindow):
             self.terminate_button.setEnabled(True)
             self.dashboard_button.setEnabled(True)
             self.available_servers.setEnabled(True)
+            time.sleep(2)
             self.change_label_text(self.ip_data, self.get_ip())
+            
         except:
             msg = QMessageBox()
             msg.setIcon(QIcon('icon.ico'))
             msg.setText("There is a problem with fetching your subscription link!\nCheck your internet connection!")
-            msg.setWindowTitle("Sing-Box - YeBeKhe: ERROR!")
+            msg.setWindowTitle("Sing-Box - YeBeKhe - UI: Aleph: ERROR!")
             msg.exec()            
 
     def terminate_exe(self):
-        if self.process.isOpen():
-            self.process.kill()
-            print('Application terminated.')
-            self.start_button.setEnabled(True)
-            self.terminate_button.setEnabled(False)
-            self.dashboard_button.setEnabled(False)
-            self.available_servers.setEnabled(False)
-            self.change_label_text(self.ip_data, self.get_ip())
+        for proc in psutil.process_iter(['pid', 'name']):
+            # TERMINATE SING-BOX.EXE IF IT IS RUNNING
+            if proc.info['name'] == 'sing-box.exe':
+                try:
+                    process = psutil.Process(proc.info['pid']) 
+                    process.terminate()  
+                except psutil.NoSuchProcess:
+                    print(f"No such process: {proc.info['pid']} ({proc.info['name']})")
+                else:
+                    print(f"Process {proc.info['pid']} ({proc.info['name']}) terminated.")
+        self.start_button.setEnabled(True)
+        self.terminate_button.setEnabled(False)
+        self.dashboard_button.setEnabled(False)
+        self.available_servers.setEnabled(False)
+        time.sleep(2)
+        self.change_label_text(self.ip_data, self.get_ip())
                 
     def setupLayout(self):
         layout = QVBoxLayout()
@@ -203,8 +223,12 @@ class SingBoxWindow(QMainWindow):
         form_layout.addRow(self.label, self.text_box)
         layout.addLayout(form_layout)
 
-        layout.addWidget(self.checkbox)
+        checkbox_layout = QHBoxLayout()
+        checkbox_layout.addWidget(self.checkbox)
+        checkbox_layout.addWidget(self.bearer_label)
+        checkbox_layout.addWidget(self.bearer_textbox)
 
+        layout.addLayout(checkbox_layout)
         btn_layout = QHBoxLayout()
         btn_layout.addWidget(self.start_button)
         btn_layout.addWidget(self.terminate_button)
@@ -290,7 +314,7 @@ if __name__ == "__main__":
     if is_admin():
         # The code of your tool goes here
         app = QApplication(sys.argv)
-        app.setApplicationName("Sing-Box - YeBeKhe")
+        app.setApplicationName("Sing-Box - YeBeKhe - UI: Aleph")
 
         window = SingBoxWindow()
         window.setWindowIcon(QIcon('icon.ico'))
