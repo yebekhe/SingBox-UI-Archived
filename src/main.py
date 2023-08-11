@@ -87,7 +87,7 @@ class SingBoxWindow(QMainWindow):
         # Create widgets
         self.bearer_label = QLabel("Secret: ", self)
         self.bearer_textbox = QLineEdit(self)
-        self.bearer_textbox.setText("YeBeKhe - UI: Aleph")
+        self.bearer_textbox.setText("YEBEKHE")
 
         self.label = QLabel("SUBSCRIPTION LINK: ", self)
         self.text_box = QLineEdit(self)
