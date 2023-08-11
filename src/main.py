@@ -1,8 +1,10 @@
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 import subprocess
-import tkinter as tk
-from tkinter import IntVar
 import urllib.request
 import os
+import ctypes
 import shutil
 import zipfile
 import configparser
@@ -10,152 +12,290 @@ import sys
 import json
 import time
 import webbrowser
-
-def open_link(link):
-    webbrowser.open(link)
-
-def check_state_func():
-    if check_state.get() == 1:
-        return True
-    else:
+import requests
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
         return False
+class SingBoxWindow(QMainWindow):
+    def show_servers(self, _):
+        # Fetching the data
+        r = requests.get("http://127.0.0.1:9090/proxies")
+        whole = json.loads(r.text)
+        proxies = whole['proxies']
 
-def get_ip():
-    time.sleep(5)
-    url = "http://ip-api.com/json/"
-    response = urllib.request.urlopen(url)
-    if response.status == 200 :
-        data = response.read()
-        ip_data = json.loads(data)
-        ip = ip_data['query']
-        location = ip_data['country']
-        return location + " | " + ip
-    else:
-        return "IP Fetch ERROR!"
+        results = []
+        for key, value in proxies.items():
+            if 'history' in value:
+                for i in value['history']:
+                    if 'delay' in i:
+                        results.append((key, i['delay']))
 
-def get_label_text(label):
-    text = label.cget("text")
-    if text is None:
-        text = ""
-    return text
+        # Sort results by delay (which is the second item in each tuple)
+        results.sort(key=lambda x: x[1])
 
-def save_text():
-    text = text_box.get()
-    config = configparser.ConfigParser()
-    config['Text'] = {'Value': text}
-    with open('config.ini', 'w') as config_file:
-        config.write(config_file)
+        # Create a new window
+        new_dialog = QDialog()
+        new_dialog.setWindowIcon(QIcon('icon.ico'))        
 
-def read_text():
-    config = configparser.ConfigParser()
-    if os.path.isfile("config.ini"):
-        config.read('config.ini')
-        text = config.get('Text', 'Value')
-        text_box.insert(tk.END, text)
+        new_dialog.setGeometry(0, 0, 500, 500)
 
-def change_label_text(label, text):
-    label.config(text=text)
+        # Add a layout to it
+        layout = QVBoxLayout(new_dialog)
 
-def remove_files_in_dir(directory):
-    # Iterate over all files in the directory
-    for filename in os.listdir(directory):
-        # Create the file path
-        file_path = os.path.join(directory, filename)
-        # Check if the path is a file and not a directory
-        if os.path.isfile(file_path):
-            # Remove the file
-            os.remove(file_path)
+        # Create a QTextEdit widget and add it to the layout
+        delay_text = QTextEdit(new_dialog)
+        layout.addWidget(delay_text)
 
-def download_file():
-    url = text_box.get()
-    urllib.request.urlretrieve(url, 'config.json')
-    print('File downloaded!')
+        # Define font properties
+        bold_font = QFont()
+        bold_font.setBold(True)
 
-def run_exe():
-    if os.path.isfile("sing-box.exe") == False:
-        version = get_latest_version()
-        url="https://github.com/SagerNet/sing-box/releases/download/" + version + "/sing-box-" + version[1:] + "-windows-amd64.zip"
-        output="sing-box-" + version[1:] + "-windows-amd64.zip"
-        unzipped_folder="sing-box-" + version[1:] + "-windows-amd64"
-        urllib.request.urlretrieve(url, output)
-        destination_path = r'.'
-        with zipfile.ZipFile(output, 'r') as archive:
-            archive.extractall(destination_path)
-        source_path = ".\\" + unzipped_folder + "\sing-box.exe"
-        destination_path = r"."
-        shutil.move(source_path, destination_path)
-        os.remove(".\\" + output)
-        remove_files_in_dir(".\\" + unzipped_folder)
-        os.rmdir(".\\" + unzipped_folder)
-    if check_state_func() == False:
-        save_text()
-        download_file()
-    else:
-        if os.path.isfile("config.json") == False:
-            print('There is no Local config.json file in application folder!')
+        for result in results:
+            proxy_name, delay = result
+
+            if delay < 600:
+                color = QColor('green')
+            elif 600 <= delay <= 1500:
+                color = QColor('orange')
+            else:
+                color = QColor('red')
+
+            delay_text.setTextColor(color)
+            delay_text.setFont(bold_font)
+            delay_text.append(f"{proxy_name} : {delay}")
+
+        # Show the dialog window
+        new_dialog.show()
+        new_dialog.exec()
+
+
+
+    def __init__(self):
+        super(SingBoxWindow, self).__init__()
+        self.process = QProcess(self)
+        self.process.start('sing-box.exe', ['run'])
+        self.refresh_button = QPushButton('Refresh', self)  # Add this line
+
+        # Create widgets
+        self.label = QLabel("SUBSCRIPTION LINK: ", self)
+        self.text_box = QLineEdit(self)
+        self.checkbox = QCheckBox("USE LOCAL CONFIG", self)
+        self.start_button = QPushButton('✅ CONNECT', self)
+        self.terminate_button = QPushButton('❌ DISCONNECT', self)
+        self.ip_label = QLabel("Location | IP : ", self)
+        self.ip_data = QLabel(self.get_ip(), self)
+        self.dashboard_button = QPushButton('📃 OPEN SING-BOX DASHBOARD', self)
+        self.available_servers = QPushButton("Available Servers", self)
+
+        # Set disable initial state for some buttons
+        self.terminate_button.setEnabled(False)
+        self.dashboard_button.setEnabled(False)
+        self.available_servers.setEnabled(False)
+
+        # Setup layout
+        self.setupLayout()
+
+        # Connect signals to slots
+        self.start_button.clicked.connect(self.run_exe)
+        self.terminate_button.clicked.connect(self.terminate_exe)
+        self.dashboard_button.clicked.connect(lambda: self.open_link("http://127.0.0.1:9090/ui"))
+        self.available_servers.clicked.connect(self.show_servers)
+        self.refresh_button.clicked.connect(self.refresh_ip)
+        # Read text from config file
+        self.read_text()
+
+
+    def save_text(self):
+        text = self.text_box.text()
+        config = configparser.ConfigParser()
+        config['Text'] = {'Value': text}
+        with open('config.ini', 'w') as config_file:
+            config.write(config_file)
+
+    def download_file(self):
+        try:
+            url = self.text_box.text()
+            urllib.request.urlretrieve(url, 'config.json')
+            print('File downloaded!')
+        except:
+            msg = QMessageBox()
+            msg.setIcon(QIcon('icon.ico'))
+            msg.setText("There is a problem with fetching your subscription link!\nCheck your internet connection!")
+            msg.setWindowTitle("Sing-Box - YeBeKhe: ERROR!")
+            msg.exec()
             return False
-    process = subprocess.Popen('sing-box.exe run', creationflags=subprocess.CREATE_NO_WINDOW)
-    print('Application running with process ID:', process.pid)
-    start_button.config(state=tk.DISABLED)
-    terminate_button.config(state=tk.NORMAL)
-    dashboard_button.config(state=tk.NORMAL)
-    change_label_text(ip_data, get_ip())
 
-def terminate_exe():
-    subprocess.Popen('taskkill /f /im sing-box.exe', creationflags=subprocess.CREATE_NO_WINDOW)
-    print('Application terminated.')
-    start_button.config(state=tk.NORMAL)
-    terminate_button.config(state=tk.DISABLED)
-    dashboard_button.config(state=tk.DISABLED)
-    change_label_text(ip_data, get_ip())
+    def get_latest_version(self):
+        command = '''powershell -Command "Invoke-WebRequest -Uri https://github.com/SagerNet/sing-box/releases/latest -UseBasicParsing | Select-Object -ExpandProperty BaseResponse | Select-Object -ExpandProperty ResponseUri | Select-Object -ExpandProperty AbsolutePath | Split-Path -Leaf"'''
+        result = subprocess.check_output(command, shell=True, universal_newlines=True)    
+        version = result.strip()
+        return version
+    def remove_files_in_dir(self, directory):
+        # Iterate over all files in the directory
+        for filename in os.listdir(directory):
+            # Create the file path
+            file_path = os.path.join(directory, filename)
+            # Check if the path is a file and not a directory
+            if os.path.isfile(file_path):
+                # Remove the file
+                os.remove(file_path)
 
-def get_latest_version():
-    command = '''powershell -Command "Invoke-WebRequest -Uri https://github.com/SagerNet/sing-box/releases/latest -UseBasicParsing | Select-Object -ExpandProperty BaseResponse | Select-Object -ExpandProperty ResponseUri | Select-Object -ExpandProperty AbsolutePath | Split-Path -Leaf"'''
-    result = subprocess.check_output(command, shell=True, universal_newlines=True)    
-    version = result.strip()
-    return version
+    def run_exe(self):
+        try:
+            if not os.path.isfile("sing-box.exe"):
+                version = self.get_latest_version()
+                url="https://github.com/SagerNet/sing-box/releases/download/" + version + "/sing-box-" + version[1:] + "-windows-amd64.zip"
+                output="sing-box-" + version[1:] + "-windows-amd64.zip"
+                unzipped_folder="sing-box-" + version[1:] + "-windows-amd64"
+                urllib.request.urlretrieve(url, output)
+                destination_path = '.'
+                with zipfile.ZipFile(output, 'r') as archive:
+                    archive.extractall(destination_path)
+                source_path = ".\\" + unzipped_folder + "\sing-box.exe"
+                shutil.move(source_path, destination_path)
+                os.remove(".\\" + output)
+                self.remove_files_in_dir(".\\" + unzipped_folder)
+                os.rmdir(".\\" + unzipped_folder)
+            if self.checkbox.isChecked() == False:
+                self.save_text()
+                self.download_file()
+            else:
+                if os.path.isfile("config.json") == False:
+                    msg = QMessageBox()
+                    msg.setIcon(QMessageBox.Icon.Critical)
+                    msg.setText("There is no Local config.json file in application folder!")
+                    msg.setWindowTitle("File Not Found Error")
+                    msg.setWindowTitle("Sing-Box - YeBeKhe: ERROR!")
+                    msg.setWindowIcon(QIcon('icon.ico'))                
+                    msg.exec()
+                    return False
+            process = subprocess.Popen('sing-box.exe run',creationflags=subprocess.CREATE_NO_WINDOW)
+            
+            print('Application running with process ID:', process.pid)
+            self.start_button.setEnabled(False)
+            self.terminate_button.setEnabled(True)
+            self.dashboard_button.setEnabled(True)
+            self.available_servers.setEnabled(True)
+            self.change_label_text(self.ip_data, self.get_ip())
+        except:
+            msg = QMessageBox()
+            msg.setIcon(QIcon('icon.ico'))
+            msg.setText("There is a problem with fetching your subscription link!\nCheck your internet connection!")
+            msg.setWindowTitle("Sing-Box - YeBeKhe: ERROR!")
+            msg.exec()            
 
-# Create main window
-window = tk.Tk()
-check_state = IntVar()
-window.title('SingBox - YeBeKhe')
-width = 420
-height = 150
-window.geometry(f"{width}x{height}")
-window.resizable(False, False)
-window.iconbitmap("icon.ico")
+    def terminate_exe(self):
+        if self.process.isOpen():
+            self.process.kill()
+            print('Application terminated.')
+            self.start_button.setEnabled(True)
+            self.terminate_button.setEnabled(False)
+            self.dashboard_button.setEnabled(False)
+            self.available_servers.setEnabled(False)
+            self.change_label_text(self.ip_data, self.get_ip())
+                
+    def setupLayout(self):
+        layout = QVBoxLayout()
 
-# label
-label = tk.Label(window, text=" SUBSCRIPTION LINK: ")
-label.grid(row=1, column=0)
+        form_layout = QFormLayout()
+        form_layout.addRow(self.label, self.text_box)
+        layout.addLayout(form_layout)
 
-# Text box
-text_box = tk.Entry(window, width=33)
-text_box.grid(row=1, column=1)
-read_text()
+        layout.addWidget(self.checkbox)
 
-#checkbox 
-checkbox = tk.Checkbutton(window, text="USE LOCAL CONFIG", variable=check_state)
-checkbox.grid(row=2, column=0, columnspan=2)
+        btn_layout = QHBoxLayout()
+        btn_layout.addWidget(self.start_button)
+        btn_layout.addWidget(self.terminate_button)
+        layout.addLayout(btn_layout)
 
-# Run button
-start_button = tk.Button(window, text='✅ CONNECT', command=run_exe)
-start_button.grid(row=3, column=0)
+        ip_layout = QHBoxLayout()
+        ip_layout.addWidget(self.ip_label)
+        ip_layout.addWidget(self.ip_data)
+        ip_layout.addWidget(self.refresh_button)
 
-# Terminate button
-terminate_button = tk.Button(window, text='❌ DISCONNECT', command=terminate_exe)
-terminate_button.grid(row=4, column=0)
-terminate_button.config(state=tk.DISABLED)
+        layout.addLayout(ip_layout)
 
-ip_label = tk.Label(window, text="Location | IP : ")
-ip_label.grid(row=3, column=1)
+        layout.addWidget(self.dashboard_button)
+        layout.addWidget(self.available_servers)
 
-ip_data = tk.Label(window, text=get_ip())
-ip_data.grid(row=4, column=1)
+        widget = QWidget()
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
 
-dashboard_button = tk.Button(window, text='📃 OPEN SING-BOX DASHNOARD', command=lambda: open_link("http://127.0.0.1:9090/ui"))
-dashboard_button.grid(row=5, column=0, columnspan=2)
-dashboard_button.config(state=tk.DISABLED)
 
-# Start the main loop
-window.mainloop()
+    def get_ip(self):
+        url = "http://ip-api.com/json/"
+        try:
+            response = urllib.request.urlopen(url)
+            if response.status == 200 :
+                data = response.read()
+                ip_data = json.loads(data)
+                ip = ip_data['query']
+                location = ip_data['country']
+                return location + " | " + ip
+            else:
+                return "FAILED TO GET YOUR IP"
+        except:
+            return "FAILED TO GET YOUR IP"
+    def read_text(self):
+        config = configparser.ConfigParser()
+        if os.path.isfile("config.ini"):
+            config.read('config.ini')
+            text = config.get('Text', 'Value')
+            self.text_box.setText(text)
+
+    def change_label_text(self, label, text):
+        label.setText(text)
+
+    def open_link(self, link):
+        webbrowser.open(link)
+    
+    def refresh_ip(self):
+        self.try_get_ip(3)
+
+    def try_get_ip(self, max_attempts: int):
+        for _ in range(max_attempts):
+            try:
+                new_ip = self.get_ip()
+                self.change_label_text(self.ip_data, new_ip)
+                break  # if get_ip() was successful, exit the loop
+            except ConnectionResetError:
+                # Sleep for a bit before trying again if there was a ConnectionResetError
+                time.sleep(1)
+        else:
+            # If we've exhausted max_attempts and still failed to get IP,
+            # then either notify user or log error as per your preference
+            print("Failed to get IP after maximum number of attempts.")
+
+class ServerDialog(QDialog):
+    def __init__(self, parent=None):
+        super(ServerDialog, self).__init__(parent)
+
+        # Create widgets
+        self.text_edit = QTextEdit(self)
+        # Setup layout
+        self.setupLayout()
+        # Load data
+        self.loadData()
+    def setupLayout(self):
+        layout = QVBoxLayout()
+        layout.addWidget(self.text_edit)
+        self.setLayout(layout)
+    def loadData(self):
+        # Implement code here
+        pass
+if __name__ == "__main__":
+    if is_admin():
+        # The code of your tool goes here
+        app = QApplication(sys.argv)
+        app.setApplicationName("Sing-Box - YeBeKhe")
+
+        window = SingBoxWindow()
+        window.setWindowIcon(QIcon('icon.ico'))
+        window.show()
+        sys.exit(app.exec())
+    else:
+        # Re-run the program with admin rights, might trigger UAC prompt
+        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
