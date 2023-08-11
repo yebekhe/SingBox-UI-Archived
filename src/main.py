@@ -13,6 +13,11 @@ import json
 import time
 import webbrowser
 import requests
+import psutil
+
+
+
+
 def is_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
@@ -21,7 +26,7 @@ def is_admin():
 class SingBoxWindow(QMainWindow):
     def show_servers(self, _):
         # Fetching the data
-        r = requests.get("http://127.0.0.1:9090/proxies")
+        r = requests.get("http://127.0.0.1:9090/proxies", headers={"Authorization": f"Bearer YEBEKHE"})
         whole = json.loads(r.text)
         proxies = whole['proxies']
 
@@ -69,15 +74,19 @@ class SingBoxWindow(QMainWindow):
         # Show the dialog window
         new_dialog.show()
         new_dialog.exec()
-
-
-
     def __init__(self):
+        for proc in psutil.process_iter(['pid', 'name']):
+            # TERMINATE SING-BOX.EXE IF IT IS RUNNING
+            if proc.info['name'] == 'sing-box.exe':
+                try:
+                    process = psutil.Process(proc.info['pid']) 
+                    process.terminate()  
+                except psutil.NoSuchProcess:
+                    print(f"No such process: {proc.info['pid']} ({proc.info['name']})")
+                else:
+                    print(f"Process {proc.info['pid']} ({proc.info['name']}) terminated.")
         super(SingBoxWindow, self).__init__()
-        self.process = QProcess(self)
-        self.process.start('sing-box.exe', ['run'])
         self.refresh_button = QPushButton('Refresh', self)  # Add this line
-
         # Create widgets
         self.label = QLabel("SUBSCRIPTION LINK: ", self)
         self.text_box = QLineEdit(self)
@@ -178,7 +187,9 @@ class SingBoxWindow(QMainWindow):
             self.terminate_button.setEnabled(True)
             self.dashboard_button.setEnabled(True)
             self.available_servers.setEnabled(True)
+            time.sleep(2)
             self.change_label_text(self.ip_data, self.get_ip())
+            
         except:
             msg = QMessageBox()
             msg.setIcon(QIcon('icon.ico'))
@@ -187,14 +198,22 @@ class SingBoxWindow(QMainWindow):
             msg.exec()            
 
     def terminate_exe(self):
-        if self.process.isOpen():
-            self.process.kill()
-            print('Application terminated.')
-            self.start_button.setEnabled(True)
-            self.terminate_button.setEnabled(False)
-            self.dashboard_button.setEnabled(False)
-            self.available_servers.setEnabled(False)
-            self.change_label_text(self.ip_data, self.get_ip())
+        for proc in psutil.process_iter(['pid', 'name']):
+            # TERMINATE SING-BOX.EXE IF IT IS RUNNING
+            if proc.info['name'] == 'sing-box.exe':
+                try:
+                    process = psutil.Process(proc.info['pid']) 
+                    process.terminate()  
+                except psutil.NoSuchProcess:
+                    print(f"No such process: {proc.info['pid']} ({proc.info['name']})")
+                else:
+                    print(f"Process {proc.info['pid']} ({proc.info['name']}) terminated.")
+        self.start_button.setEnabled(True)
+        self.terminate_button.setEnabled(False)
+        self.dashboard_button.setEnabled(False)
+        self.available_servers.setEnabled(False)
+        time.sleep(2)
+        self.change_label_text(self.ip_data, self.get_ip())
                 
     def setupLayout(self):
         layout = QVBoxLayout()
