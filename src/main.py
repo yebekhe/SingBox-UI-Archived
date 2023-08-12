@@ -379,7 +379,7 @@ if __name__ == "__main__":
         window = SingBoxWindow()
         window.setWindowIcon(icon)
         window.show()
-        asyncio.run(window.check_for_update("0.9.0"))
+        asyncio.run(window.check_for_update("1.1.0"))
         sys.exit(app.exec())
     else:
         # Re-run the program with admin rights, might trigger UAC prompt
