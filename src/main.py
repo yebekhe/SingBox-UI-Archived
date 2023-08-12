@@ -375,11 +375,10 @@ if __name__ == "__main__":
         pixmap.loadFromData(icon_data, format='ICO')
         icon = QIcon(pixmap)
         app.setApplicationName("Sing-Box - YeBeKhe - UI: Aleph")
-
         window = SingBoxWindow()
         window.setWindowIcon(icon)
         window.show()
-        asyncio.run(window.check_for_update("1.1.0"))
+        asyncio.run(window.check_for_update("0.9.0"))
         sys.exit(app.exec())
     else:
         # Re-run the program with admin rights, might trigger UAC prompt
