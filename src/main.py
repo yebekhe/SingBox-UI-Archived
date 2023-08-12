@@ -17,6 +17,21 @@ import webbrowser
 import requests
 import psutil
 import asyncio
+import socket
+
+
+def check_server(address, port):
+    # Create a TCP socket
+    sock = socket.socket()
+    try:
+        sock.connect((address, port))
+        return True
+    except OSError as error:  
+        print(f"Connection to {address}:{port} failed: {error.strerror}")
+        return False
+    finally:
+        sock.close()
+
 # from icon_data import icon_data
 
 def is_admin():
@@ -184,18 +199,6 @@ class SingBoxWindow(QMainWindow):
                 os.remove(file_path)
 
 
-    def is_json_file_valid(self, json_file):
-        try:
-            with open(json_file, 'r') as f:
-                json.load(f)
-            return True
-        except ValueError as e:
-            print(f"invalid json: {e}")
-            return False
-        except Exception as e:
-            print(f"could not read file: {e}")
-            return False
-
     def run_exe(self):
         try:
             if not os.path.isfile("sing-box.exe"):
@@ -234,9 +237,10 @@ class SingBoxWindow(QMainWindow):
                     msg.setWindowIcon(icon)                
                     msg.exec()
                     return False
-            if self.is_json_file_valid("config.json"):
-                process = subprocess.Popen('sing-box.exe run',creationflags=subprocess.CREATE_NO_WINDOW)
-                print('Application running with process ID:', process.pid)
+            process = subprocess.Popen('sing-box.exe run',creationflags=subprocess.CREATE_NO_WINDOW)
+            print(process)
+            time.sleep(2)
+            if check_server("127.0.0.1",9090):
                 self.start_button.setEnabled(False)
                 self.terminate_button.setEnabled(True)
                 self.dashboard_button.setEnabled(True)
@@ -244,7 +248,7 @@ class SingBoxWindow(QMainWindow):
             else:
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Icon.Critical)
-                msg.setText("Json file is invalid! Check your subscription link!")
+                msg.setText("Something went wrong! Try again!")
                 msg.setWindowTitle("Sing-Box - YeBeKhe - UI: Aleph: ERROR!")
                 msg.setWindowIcon(icon)                
                 msg.exec()
@@ -378,7 +382,7 @@ if __name__ == "__main__":
         window = SingBoxWindow()
         window.setWindowIcon(icon)
         window.show()
-        asyncio.run(window.check_for_update("0.9.0"))
+        asyncio.run(window.check_for_update("1.1.0"))
         sys.exit(app.exec())
     else:
         # Re-run the program with admin rights, might trigger UAC prompt
