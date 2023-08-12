@@ -16,7 +16,7 @@ SingBoxUI is a graphical user interface application that allows users to connect
 ## Prerequisites
 
 - Python 3.6 or higher
-- tkinter library
+- pyqt6 library
 - urllib library
 
 ## Getting Started
