@@ -1,2 +1,2 @@
-tk
+pyqt6
 urllib3
