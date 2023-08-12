@@ -123,7 +123,7 @@ class SingBoxWindow(QMainWindow):
         self.start_button = QPushButton('✅ CONNECT', self)
         self.terminate_button = QPushButton('❌ DISCONNECT', self)
         self.ip_label = QLabel("Location | IP : ", self)
-        self.ip_data = QLabel(self.get_ip(), self)
+        self.ip_data = QLabel("LOADING", self)
         self.dashboard_button = QPushButton('📃 Open Sing-Box Dashboard', self)
         self.available_servers = QPushButton("Available Servers", self)
 
@@ -373,7 +373,6 @@ class ServerDialog(QDialog):
         pass
 if __name__ == "__main__":
     if is_admin():
-        # The code of your tool goes here
         app = QApplication(sys.argv)
         pixmap = QPixmap()
         pixmap.loadFromData(icon_data, format='ICO')
