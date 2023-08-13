@@ -24,7 +24,7 @@ from PyQt6.QtCore import QThread, QTimer,  pyqtSignal as Signal
 
 
 def modify_config(flag):
-    with open('config.json', 'r') as file:
+    with open('config.json', 'r', encoding= "utf-8") as file:  
         data = json.load(file)
     item = {
         "type": "tun",
@@ -45,7 +45,7 @@ def modify_config(flag):
     elif flag == True:
         if item not in data['inbounds']:
             data['inbounds'].append(item)
-    with open('config.json', 'w') as file:
+    with open('config.json', 'w', encoding = "utf-8") as file:
         json.dump(data, file, indent=4)
 
 
@@ -211,7 +211,7 @@ class SingBoxWindow(QMainWindow):
         self.label = QLabel("Subscription Link: ", self)
         self.text_box = QLineEdit(self)
         self.checkbox = QCheckBox("Use Local Config", self)
-        self.vpnmode = QCheckBox("VPN Mode (User Reconnection Required Upon Changes)", self)
+        self.vpnmode = QCheckBox("VPN Mode (Reconnection Required)", self)
         self.vpnmode.setChecked(True)
         self.vpnport_label = QLabel("Proxy Port: 2080", self)
         self.start_button = QPushButton('✅ CONNECT', self)
@@ -614,7 +614,9 @@ class singbox(QThread):
                 except psutil.NoSuchProcess:
                     print(f"No such process: {proc.info['pid']} ({proc.info['name']})")
                 else:
-                    print(f"Process {proc.info['pid']} ({proc.info['name']}) terminated.")
+                    print(f"Process {proc.info['pid']} ({proc.info['name']}) terminated.")        
+# def is_admin():
+#     return True
 if __name__ == "__main__":
     if is_admin():
         app = QApplication(sys.argv)
