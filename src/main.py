@@ -18,9 +18,47 @@ import requests
 import psutil
 import asyncio
 import aiohttp
-import socket
+from socket import socket, AF_INET, SOCK_STREAM
 from urllib.parse import urlparse
-from PySide6.QtCore import QThread, Signal
+from PyQt6.QtCore import QThread, QTimer,  pyqtSignal as Signal
+
+
+def modify_config(flag):
+    with open('config.json', 'r') as file:
+        data = json.load(file)
+    item = {
+        "type": "tun",
+        "tag": "tun-in",
+        "domain_strategy": "",
+        "interface_name": "tun0",
+        "inet4_address": "172.19.0.1/30",
+        "mtu": 9000,
+        "auto_route": True,
+        "strict_route": True,
+        "stack": "system",
+        "endpoint_independent_nat": True,
+        "sniff": True,
+        "sniff_override_destination": True
+    }
+    if flag == False:
+        data['inbounds'] = [i for i in data['inbounds'] if i['type']!='tun']
+    elif flag == True:
+        if item not in data['inbounds']:
+            data['inbounds'].append(item)
+    with open('config.json', 'w') as file:
+        json.dump(data, file, indent=4)
+
+
+def find_mixed_port():
+
+    with open('config.json') as f:
+        data = json.load(f)
+
+    for inbound in data['inbounds']:
+        if inbound.get('type', '') == 'mixed':
+            return inbound.get('listen_port', None)
+    return None
+
 
 async def get_ip():
     url = "http://ip-api.com/json/"
@@ -37,20 +75,22 @@ async def get_ip():
                     return "FAILED TO GET YOUR IP"
     except:
         return "FAILED TO GET YOUR IP"
+    finally:
+        # Allow the tasks kept in the event_loop to finish up.
+        await asyncio.sleep(0.250) 
+
 
 def check_server(address, port):
-    # Create a TCP socket
-    sock = socket.socket()
-    try:
-        sock.connect((address, port))
-        return True
-    except OSError as error:  
-        print(f"Connection to {address}:{port} failed: {error.strerror}")
-        return False
-    finally:
-        sock.close()
-
-# from icon_data import icon_data
+    with socket(AF_INET, SOCK_STREAM) as sock:
+        try:
+            sock.connect((address, port))
+            sock.close()
+            return True
+        except OSError as error:  
+            print(f"Connection to {address}:{port} failed: {error.strerror}")
+            return False
+        finally:
+            sock.close()
 
 def is_admin():
     try:
@@ -156,7 +196,6 @@ class SingBoxWindow(QMainWindow):
         self.get_ip_thread = GetIPThread()
         self.get_ip_thread.result.connect(self.change_ip_label)
         self.get_ip_thread.error.connect(self.handle_get_ip_error)
-        self.get_ip_thread.start()
 
         self.check_server_thread = CheckServerThread()
         self.check_server_thread.result.connect(self.handle_check_server_result)
@@ -172,9 +211,13 @@ class SingBoxWindow(QMainWindow):
         self.label = QLabel("Subscription Link: ", self)
         self.text_box = QLineEdit(self)
         self.checkbox = QCheckBox("Use Local Config", self)
+        self.vpnmode = QCheckBox("VPN Mode (User Reconnection Required Upon Changes)", self)
+        self.vpnmode.setChecked(True)
+        self.vpnport_label = QLabel("Proxy Port: 2080", self)
         self.start_button = QPushButton('✅ CONNECT', self)
         self.terminate_button = QPushButton('❌ DISCONNECT', self)
         self.ip_label = QLabel("Location | IP : ", self)
+
         self.ip_data = QLabel("LOADING", self)
         self.dashboard_button = QPushButton('📃 Open Sing-Box Dashboard', self)
         self.available_servers = QPushButton("Available Servers", self)
@@ -212,7 +255,7 @@ class SingBoxWindow(QMainWindow):
         self.dashboard_button.clicked.connect(lambda: self.open_link("http://127.0.0.1:9090/ui"))
         self.available_servers.clicked.connect(self.show_servers)
         self.refresh_button.clicked.connect(self.refresh_ip)
-        self.setMinimumSize(370, 190)
+        self.setFixedSize(500,245)
         # Read text from config file
         self.read_text()
         self.timer = QTimer()
@@ -232,18 +275,6 @@ class SingBoxWindow(QMainWindow):
             self.check_server_thread.start()
         if not self.get_ip_thread.isRunning():
             self.get_ip_thread.start()
-    # WE PICKED UP A DIFFERENT APPROACH INSTEAD OF THIS, SO THE PROGRAM WON'T GLITCH
-    #     #self.refresh_ip() 
-    #     if check_server("127.0.0.1",9090):
-    #         self.indicator.setPixmap(self.green_indicator)
-    #         self.status_bar.showMessage("Sing-Box is running")
-    #     else:
-    #         self.indicator.setPixmap(self.red_indicator)
-    #         self.status_bar.showMessage("Sing-Box is NOT running")
-    #         self.start_button.setEnabled(True)
-    #         self.terminate_button.setEnabled(False)
-    #         self.dashboard_button.setEnabled(False)
-    #         self.available_servers.setEnabled(False)
 
                 
     def setupLayout(self):
@@ -259,6 +290,14 @@ class SingBoxWindow(QMainWindow):
         checkbox_layout.addWidget(self.bearer_textbox)
 
         layout.addLayout(checkbox_layout)
+        vpnmode_layout = QHBoxLayout()
+        vpnmode_layout.addWidget(self.vpnmode)
+        vpnmode_layout.addWidget(self.bearer_label)
+        vpnmode_layout.addWidget(self.bearer_textbox)
+        vpnmode_layout.stretch(1)
+        vpnmode_layout.addWidget(self.vpnport_label)
+        layout.addLayout(vpnmode_layout)
+
         btn_layout = QHBoxLayout()
         btn_layout.addWidget(self.start_button)
         btn_layout.addWidget(self.terminate_button)
@@ -334,15 +373,16 @@ class SingBoxWindow(QMainWindow):
             config.write(config_file)
 
     def download_file(self):
-        self.status_bar.showMessage("Downloading the config file", 2000)
         url = self.text_box.text()
-        self.download_thread = DownloadThread(url)
-        self.download_thread.signal.connect(self.update_status_bar)
-        self.download_thread.start()
+        self.status_bar.showMessage("Downloading the config file", 2000)
+        try:
+            urllib.request.urlretrieve(url, "config.json")
+        except:
+            self.status_bar.showMessage("Failed to download the config file", 2000)
 
 
 
-    def get_latest_version():
+    def get_latest_version(self):
         url = "https://github.com/SagerNet/sing-box/releases/latest"
         response = requests.get(url)
         parsed_url = urlparse(response.url)
@@ -378,10 +418,12 @@ class SingBoxWindow(QMainWindow):
                 os.rmdir(".\\" + unzipped_folder)
             if self.checkbox.isChecked() == False:
                 try:
-                        
+                    time.sleep(0.5)
                     self.save_text()
                     self.download_file()
-                except:
+
+                except Exception as e:
+                    print(e)
                     msg = QMessageBox()
                     msg.setIcon(QMessageBox.Icon.Critical)
                     msg.setText("Wrong link or no internet connection!")
@@ -398,10 +440,29 @@ class SingBoxWindow(QMainWindow):
                     msg.setWindowIcon(icon)                
                     msg.exec()
                     return False
+            if self.vpnmode.isChecked() == True:
+                modify_config(False)
+                modify_config(True)
+                self.vpnport_label.setText("VPN MODE: ON")
+            else:
+                modify_config(False)
+                self.vpnport_label.setText(f"Proxy Port: {find_mixed_port()}")
 
+            for proc in psutil.process_iter(['pid', 'name']):
+                # TERMINATE SING-BOX.EXE IF IT IS RUNNING
+                if proc.info['name'] == 'sing-box.exe':
+                    try:
+                        process = psutil.Process(proc.info['pid']) 
+                        process.terminate()  
+                    except psutil.NoSuchProcess:
+                        print(f"No such process: {proc.info['pid']} ({proc.info['name']})")
+                    else:
+                        print(f"Process {proc.info['pid']} ({proc.info['name']}) terminated.")    
+            
             self.thread = singbox()
             self.thread.signal.connect(self.update_status_bar)
             self.thread.start()
+
             if check_server("127.0.0.1",9090):
                 self.start_button.setEnabled(False)
                 self.terminate_button.setEnabled(True)
@@ -417,9 +478,10 @@ class SingBoxWindow(QMainWindow):
                 msg.setWindowIcon(icon)                
                 msg.exec()
                 return False
-        except:
+        except Exception as e:
+            print(e)
             msg = QMessageBox()
-            msg.setIcon(icon)
+            msg.setIcon(QMessageBox.Icon.Critical)
             msg.setText("There is a problem with fetching your subscription link!\nCheck your internet connection!")
             msg.setWindowTitle("Sing-Box - YeBeKhe - UI: Aleph: ERROR!")
             msg.exec()
@@ -432,6 +494,7 @@ class SingBoxWindow(QMainWindow):
         self.terminate_button.setEnabled(False)
         self.dashboard_button.setEnabled(False)
         self.available_servers.setEnabled(False)
+        self.status_bar.showMessage("Sing-Box is NOT running")
         self.refresh_ip()
 
 
@@ -449,18 +512,14 @@ class SingBoxWindow(QMainWindow):
         webbrowser.open(link)
     
     def refresh_ip(self):
-        self.try_get_ip(3)
+        self.try_get_ip()
 
-    def try_get_ip(self, max_attempts: int):
-        for _ in range(max_attempts):
-            try:
-                new_ip = asyncio.run(get_ip())
-                self.change_label_text(self.ip_data, new_ip)
-                
-                break
-            except ConnectionResetError:
-                pass
-        else:
+    def try_get_ip(self):
+        try:
+            new_ip = asyncio.run(get_ip())
+            self.change_label_text(self.ip_data, new_ip)
+            
+        except:
             print("Failed to get IP after maximum number of attempts.")
 
 
@@ -468,6 +527,11 @@ class SingBoxWindow(QMainWindow):
         if result:
             self.indicator.setPixmap(self.green_indicator)
             self.status_bar.showMessage("Sing-Box is running")
+            self.start_button.setEnabled(False)
+            self.terminate_button.setEnabled(True)
+            self.dashboard_button.setEnabled(True)
+            self.available_servers.setEnabled(True)
+
         else:
             self.indicator.setPixmap(self.red_indicator)
             self.status_bar.showMessage("Sing-Box is NOT running")
@@ -495,54 +559,21 @@ class ServerDialog(QDialog):
         pass
 
 
-class ServerCheckThread(QThread):
-    signal = pyqtSignal('PyQt_PyObject')  # Signal to emit the result
-
-    def __init__(self, address, port):
-        QThread.__init__(self)
-        self.address = address
-        self.port = port
-
-    def run(self):
-        sock = socket.socket()
-        try:
-            sock.connect((self.address, self.port))
-            result = True
-        except OSError as error:  
-            print(f"Connection to {self.address}:{self.port} failed: {error.strerror}")
-            result = False
-        finally:
-            sock.close()
-
-        self.signal.emit(result)  # Emit the result when finished
-    def stop(self):
-        self.isRunning = False
 
 class GetIPThread(QThread):
     result = Signal(str)
     error = Signal(Exception)
-
     def run(self):
         try:
             new_ip = asyncio.run(get_ip())
             self.result.emit(new_ip)
         except Exception as e:
             self.error.emit(e)
+    def stop(self):
+        self.isRunning = False
+        
 
 
-class DownloadThread(QThread):
-    signal = pyqtSignal('PyQt_PyObject')
-
-    def __init__(self, url):
-        QThread.__init__(self)
-        self.url = url
-
-    def run(self):
-        try:
-            urllib.request.urlretrieve(self.url, "config.json")
-            self.signal.emit("The config file has been downloaded successfully!")
-        except:
-            self.signal.emit("Something went wrong! Try again!")
     
 class CheckServerThread(QThread):
     result = Signal(bool)
@@ -552,10 +583,10 @@ class CheckServerThread(QThread):
         self.result.emit(result)
 
 class singbox(QThread):
-    signal = pyqtSignal('PyQt_PyObject')
+    signal =Signal('PyQt_PyObject')
 
     def __init__(self):
-        QThread.__init__(self)
+        super().__init__()
 
     def run(self):
         process = subprocess.Popen('sing-box.exe run', stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=subprocess.CREATE_NO_WINDOW)
@@ -583,8 +614,7 @@ class singbox(QThread):
                 except psutil.NoSuchProcess:
                     print(f"No such process: {proc.info['pid']} ({proc.info['name']})")
                 else:
-                    print(f"Process {proc.info['pid']} ({proc.info['name']}) terminated.")        
-
+                    print(f"Process {proc.info['pid']} ({proc.info['name']}) terminated.")
 if __name__ == "__main__":
     if is_admin():
         app = QApplication(sys.argv)
