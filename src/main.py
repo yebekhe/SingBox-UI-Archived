@@ -295,11 +295,10 @@ class SingBoxWindow(QMainWindow):
         super().changeEvent(e)
     def set_language(self, language):
         try:
-
             self.language = language
             config = configparser.ConfigParser()
             config.read('config.ini')
-            self.language = language
+            config['lang'] = {'Value': language}
         except:
             self.language = "english"
         config['lang'] = {'Value': language}
@@ -415,7 +414,10 @@ class SingBoxWindow(QMainWindow):
         text = self.text_box.text()
         config = configparser.ConfigParser()
         config['Text'] = {'Value': text}
-        config['lang'] = {"Value" : "english"}
+        try:
+            config['lang'] = {"Value" : f"{self.language}"}
+        except:
+            config['lang'] = {"Value" : "english"}
         with open('config.ini', 'w') as config_file:
             config.write(config_file)
 
@@ -553,12 +555,12 @@ class SingBoxWindow(QMainWindow):
         config = configparser.ConfigParser()
         if os.path.isfile("config.ini"):
             config.read('config.ini')
-            text = config.get('Text', 'Value')
             try:
                 self.language = config.get('lang', 'Value')
             except:
                 self.language = "english"
             try:
+                text = config.get('Text', 'Value')
                 self.text_box.setText(text)
             except:
                 self.text_box.setText(" ")
