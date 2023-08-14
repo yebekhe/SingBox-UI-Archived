@@ -100,7 +100,7 @@ def is_admin():
 class SingBoxWindow(QMainWindow):
     gitversion = ""
     def closeEvent(self, event):
-
+        
         update_message = QMessageBox()
         update_message.setWindowTitle(wordyword(self.language,"exit"))
         update_message.setText(wordyword(self.language,"exitsure"))
@@ -182,6 +182,15 @@ class SingBoxWindow(QMainWindow):
                 else:
                     print(f"Process {proc.info['pid']} ({proc.info['name']}) terminated.")
         super(SingBoxWindow, self).__init__()
+        self.language = ""
+        cfg = configparser.ConfigParser()
+        if os.path.isfile("config.ini"):
+            cfg.read('config.ini')
+            text = cfg.get('Text', 'Value')
+            try:
+                self.language = cfg.get('lang', 'Value')
+            except:
+                self.language = "english"
         self.connection_status = "disconnected"
         self.tray_icon = QSystemTrayIcon(self)
         self.tray_icon.setToolTip("SingBoxUI")
