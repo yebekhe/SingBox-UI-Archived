@@ -694,8 +694,8 @@ class singbox(QThread):
                     print(f"No such process: {proc.info['pid']} ({proc.info['name']})")
                 else:
                     print(f"Process {proc.info['pid']} ({proc.info['name']}) terminated.")        
-def is_admin():
-    return True
+# def is_admin():
+#     return True
 if __name__ == "__main__":
     if is_admin():
         app = QApplication(sys.argv)
