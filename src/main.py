@@ -191,6 +191,8 @@ class SingBoxWindow(QMainWindow):
                 self.language = cfg.get('lang', 'Value')
             except:
                 self.language = "english"
+        else:
+            self.language = "english"
         self.connection_status = "disconnected"
         self.tray_icon = QSystemTrayIcon(self)
         self.tray_icon.setToolTip("SingBoxUI")
@@ -289,10 +291,14 @@ class SingBoxWindow(QMainWindow):
                 return
         super().changeEvent(e)
     def set_language(self, language):
-        self.language = language
-        config = configparser.ConfigParser()
-        config.read('config.ini')
-        self.language = language
+        try:
+
+            self.language = language
+            config = configparser.ConfigParser()
+            config.read('config.ini')
+            self.language = language
+        except:
+            self.language = "english"
         config['lang'] = {'Value': language}
         with open('config.ini', 'w') as configfile:
             config.write(configfile)
@@ -688,8 +694,8 @@ class singbox(QThread):
                     print(f"No such process: {proc.info['pid']} ({proc.info['name']})")
                 else:
                     print(f"Process {proc.info['pid']} ({proc.info['name']}) terminated.")        
-# def is_admin():
-#     return True
+def is_admin():
+    return True
 if __name__ == "__main__":
     if is_admin():
         app = QApplication(sys.argv)
