@@ -186,7 +186,10 @@ class SingBoxWindow(QMainWindow):
         cfg = configparser.ConfigParser()
         if os.path.isfile("config.ini"):
             cfg.read('config.ini')
-            text = cfg.get('Text', 'Value')
+            try:
+                text = cfg.get('Text', 'Value')
+            except:
+                text = ""
             try:
                 self.language = cfg.get('lang', 'Value')
             except:
@@ -555,7 +558,10 @@ class SingBoxWindow(QMainWindow):
                 self.language = config.get('lang', 'Value')
             except:
                 self.language = "english"
-            self.text_box.setText(text)
+            try:
+                self.text_box.setText(text)
+            except:
+                self.text_box.setText(" ")
 
     def change_label_text(self, label, text):
         label.setText(text)
