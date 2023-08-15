@@ -24,6 +24,7 @@ import aiohttp
 from socket import socket, AF_INET, SOCK_STREAM
 from urllib.parse import urlparse
 from PyQt6.QtCore import QThread, QTimer,  pyqtSignal as Signal
+from urllib.parse import unquote
 
 def wordyword(language,sentence):
     data = languages
@@ -411,7 +412,7 @@ class SingBoxWindow(QMainWindow):
         QDesktopServices.openUrl(QUrl("https://github.com/yebekhe/SingBox-UI/releases/latest"))
 
     def save_text(self):
-        text = self.text_box.text()
+        text = unquote(self.text_box.text())
         config = configparser.ConfigParser()
         config['Text'] = {'Value': text}
         try:
@@ -420,15 +421,16 @@ class SingBoxWindow(QMainWindow):
             config['lang'] = {"Value" : "english"}
         with open('config.ini', 'w') as config_file:
             config.write(config_file)
-
+            
     def download_file(self):
-        url = self.text_box.text()
+        url = unquote(self.text_box.text())
         self.status_bar.showMessage(wordyword(self.language, "downloading"), 2000)
         try:
-            urllib.request.urlretrieve(url, "config.json")
-        except:
+            response = requests.get(url, allow_redirects=True)
+            with open('config.json', 'wb') as f:
+                f.write(response.content)
+        except Exception as e:
             self.status_bar.showMessage(wordyword(self.language, "downloadingerror"), 2000)
-
 
 
     def get_latest_version(self):
@@ -467,6 +469,7 @@ class SingBoxWindow(QMainWindow):
                 try:
                     time.sleep(0.5)
                     self.save_text()
+                    print(self.save_text)
                     self.download_file()
 
                 except Exception as e:
@@ -702,8 +705,8 @@ class singbox(QThread):
                     print(f"No such process: {proc.info['pid']} ({proc.info['name']})")
                 else:
                     print(f"Process {proc.info['pid']} ({proc.info['name']}) terminated.")        
-# def is_admin():
-#     return True
+def is_admin():
+    return True
 if __name__ == "__main__":
     if is_admin():
         app = QApplication(sys.argv)
