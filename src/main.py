@@ -2,6 +2,267 @@ icon_data = b'\x00\x00\x01\x00\x01\x00\xed\x00\x00\x00\x01\x00 \x00(\xd4\x03\x00
 languages = {"english":{"exit" : "Exit Confirmation","exitsure": "Are you sure you want to exit the SingBoxUI?","exiting": "Exiting SingBoxUI...","secretissue" : "Either Secret code is wrong or there's a connection problem!","refresh" : "Refresh","sublink" : "Subscription Link: ","localconfig" : "Use Local Config","vpnmode" : "VPN Mode (Reconnection Required)","connect" : "CONNECT","disconnect" : "DISCONNECT","singdash" : "Open Sing-Box Dashboard","availservers" : "Available Servers","menu": "Menu","lang" : "Language 🌐","about" : "About","downloading" : "Downloading Config File...","downloaded" : "Config File Downloaded!","downloadingerror" : "Failed to download the config file","wronglink" : "Wrong link or no internet connection!","nolocalconfig" : "There is no Local config.json file in application folder!","vpnmodeon" : "VPN MODE: ON","proxyport" : "Proxy Port: ","singboxrunning" : "Sing-Box is running!","somethingwrong" : "Something went wrong! Try again!","fetchingerror" : "There is a problem with fetching your subscription link!\nCheck your internet connection!","singboxnotrunning" : "Sing-Box is NOT running"},"persian": {"exit": "تأیید خروج","exitsure": "آیا مطمئن هستید که می خواهید از SingBoxUI خارج شوید؟","exiting": "در حال خروج از SingBoxUI ...","secretissue": "یا کد رمز اشتباه است یا مشکل ارتباطی وجود دارد!","refresh": "به روز رسانی","sublink": "لینک اشتراک: ","localconfig": "استفاده از پیکربندی محلی","vpnmode": "حالت VPN (نیاز به اتصال مجدد)","connect": "اتصال","disconnect": "قطع اتصال","singdash": "باز کردن داشبورد Sing-Box","availservers": "سرورهای موجود","menu": "منو","lang": "زبان 🌐","about": "درباره","downloading": "در حال دانلود فایل پیکربندی...","downloaded": "فایل پیکربندی دانلود شد!","downloadingerror": "ناموفق در دالنود فایل پیکربندی","wronglink": "لینک اشتباه است یا اتصال اینترنتی وجود ندارد!","nolocalconfig": "فایل config.json در پوشه برنامه وجود ندارد!","vpnmodeon": "حالت VPN: روشن","proxyport": "پورت پروکسی: ","singboxrunning": "Sing-Box در حال اجرا است!","somethingwrong": "مشکلی پیش آمده است! دوباره تلاش کنید!","fetchingerror": "مشکلی در دانلود لینک اشتراک شما وجود دارد!\nاتصال اینترنت خود را بررسی کنید!","singboxnotrunning": "Sing-Box در حال اجرا نیست"},"chinese":{"exit" : "退出确认","exitsure": "您确定要退出SingBoxUI吗？","exiting": "正在退出SingBoxUI...","secretissue" : "秘密代码错误或存在连接问题！","refresh" : "刷新","sublink" : "订阅链接：","localconfig" : "使用本地配置","vpnmode" : "VPN模式（需要重新连接）","connect" : "连接","disconnect" : "断开连接","singdash" : "打开Sing-Box控制面板","availservers" : "可用服务器","menu": "菜单","lang" : "语言 🌐","about" : "关于","downloading" : "正在下载配置文件...","downloaded" : "配置文件已下载！","downloadingerror" : "无法下载配置文件","wronglink" : "链接错误或无互联网连接！","nolocalconfig" : "应用程序文件夹中没有本地config.json文件！","vpnmodeon" : "VPN模式：开启","proxyport" : "代理端口：","singboxrunning" : "Sing-Box正在运行！","somethingwrong" : "出了点问题！再试一次！","fetchingerror" : "获取订阅链接时出现问题！\n检查你的互联网连接！","singboxnotrunning" : "Sing-Box未在运行"},"russian":{"exit" : "Подтверждение выхода","exitsure": "Вы уверены, что хотите выйти из SingBoxUI?","exiting": "Выход из SingBoxUI...","secretissue" : "Секретный код неверный или проблема с соединением!","refresh" : "Обновить","sublink" : "Ссылка на подписку: ","localconfig" : "Использовать локальную конфигурацию","vpnmode" : "Режим VPN (Требуется переподключение)","connect" : "ПОДКЛЮЧИТЬ","disconnect" : "ОТКЛЮЧИТЬ","singdash" : "Открыть панель управления Sing-Box","availservers" : "Доступные серверы","menu": "Меню","lang" : "Язык 🌐","about" : "О программе","downloading" : "Загрузка файла конфигурации...","downloaded" : "Файл конфигурации загружен!","downloadingerror" : "Не удалось загрузить файл конфигурации","wronglink" : "Неправильная ссылка или отсутствует интернет-соединение!","nolocalconfig" : "В папке приложения нет файла local config.json!","vpnmodeon" : "РЕЖИМ VPN: ВКЛ","proxyport" : "Прокси-порт: ","singboxrunning" : "Sing-Box работает!","somethingwrong" : "Что-то пошло не так! Попробуйте ещё раз!","fetchingerror" : "Есть проблема с получением вашей ссылки на подписку!\nПроверьте ваше интернет-соединение!","singboxnotrunning" : "Sing-Box НЕ работает"}}
 button_palette = {"blue": ["#1fa5f3", "#1987c6", "#146a9c", "#87878787"], "red": ["#cb4845", "#b03d3b", "#992f2d", "#87878787"], "yellow": ["#ddc600", "#d0ba00", "#b3a001", "#87878787"], "purple": ["#7f50d2", "#6e45b6", "#5d3b99", "#87878787"] }
 LineEdit_palette = {"light": ['#212d40', '#e0dede', '#fff'], "dark": ['#eee', '#2e3f59', '#313b4b']}
+
+
+
+body_light = """
+background: #eee;
+color: #212d40;
+"""
+
+body_dark = """
+background: #212d40;
+color: #eee;
+"""
+
+connectButtonStyle = """
+QPushButton {
+    margin: 200px
+}
+"""
+
+LineEditStyle = """
+QLineEdit {{
+    width: 90%;
+    height: 22px;
+    color: {};
+    background: {};
+    padding: 15px;
+    border: none;
+    border-radius: 6px;
+}}
+QLineEdit:focus {{
+    background: {};
+    border: 2px solid '#212d40';
+}}
+"""
+
+lableStyle = """
+QLabel {
+    width: 90%;
+    font-weight: bold;
+}
+"""
+
+buttonStyle = """
+.QPushButton {{
+    width: 60%;
+    height: 40px;
+    color: {};
+    background: {};
+    font-size: 1em;
+    font-weight: bold;
+    outline: none;
+    border: none;
+    border-radius: 6px;
+}}
+.QPushButton:hover{{
+    background: {};
+}}
+.QPushButton:pressed{{
+    background: {};
+}} 
+.QPushButton:focus{{
+    border: 1px solid black;
+}}
+QPushButton:disabled{{
+    background: {};
+}}
+"""
+
+
+from PyQt6.QtGui import QColor, QBrush, QPaintEvent, QPainter, QRadialGradient
+from PyQt6.QtWidgets import QCheckBox, QPushButton, QStyleOption, QStyle
+from PyQt6.QtCore import (
+    Qt, QSize, QPoint, QPointF, QRectF, QRect,
+    QEasingCurve, QPropertyAnimation, QSequentialAnimationGroup,
+    pyqtSlot, pyqtProperty, QTimer)
+
+class SwitchButton(QCheckBox):
+    def __init__(self,
+                 parent=None,
+                 bar_color='#808080aa',
+                 checked_color="#00B0ff",
+                 handle_color=Qt.GlobalColor.white,
+                 pulse_unchecked_color="#44999999",
+                 pulse_checked_color="#4400b0ee"):
+        super().__init__(parent)
+
+        self.bar_brush = QBrush(QColor(bar_color).lighter(130))
+        self.bar_checked_brush = QBrush(QColor(checked_color).lighter(130))
+        self.handle_brush = QBrush(handle_color)
+        self.handle_checked_brush = QBrush(QColor(checked_color))
+        self.pulse_unchecked_animation = QBrush(QColor(pulse_unchecked_color))
+        self.pulse_checked_animation = QBrush(QColor(pulse_checked_color))
+
+        self.setContentsMargins(8, 0, 8, 0)
+        self._handle_position = 0
+        self._pulse_radius = 0
+
+        self.animation = QPropertyAnimation(self, b"handle_position", self)
+        self.animation.setEasingCurve(QEasingCurve.Type.InOutCubic)
+        self.animation.setDuration(200)  # time in ms
+
+        self.pulse_anim = QPropertyAnimation(self, b"pulse_radius", self)
+        self.pulse_anim.setDuration(350)  # time in ms
+        self.pulse_anim.setStartValue(10)
+        self.pulse_anim.setEndValue(20)
+
+        self.animations_group = QSequentialAnimationGroup()
+        self.animations_group.addAnimation(self.animation)
+        self.animations_group.addAnimation(self.pulse_anim)
+
+        self.stateChanged.connect(self.setup_animation)
+
+    def sizeHint(self):
+        return QSize(60, 45)
+
+    def hitButton(self, pos: QPoint):
+        return self.contentsRect().contains(pos)
+
+    @pyqtSlot(int)
+    def setup_animation(self, value):
+        self.animations_group.stop()
+        if value:
+            self.animation.setEndValue(1)
+        else:
+            self.animation.setEndValue(0)
+        self.animations_group.start()
+
+    def paintEvent(self, e: QPaintEvent):
+        contRect = self.contentsRect()
+        handleRadius = round(0.24 * contRect.height())
+
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setPen(Qt.GlobalColor.transparent)
+        barRect = QRectF(0, 0, contRect.width() - handleRadius, 0.40 * contRect.height())
+        barRect.moveCenter(QPointF(contRect.center()))
+        rounding = barRect.height() / 2
+
+        trailLength = contRect.width() - 2 * handleRadius
+        xPos = contRect.x() + handleRadius + trailLength * self._handle_position
+
+        if self.pulse_anim.state() == QPropertyAnimation.State.Running:
+            painter.setBrush(
+                self.pulse_checked_animation if self.isChecked() else self.pulse_unchecked_animation)
+            painter.drawEllipse(QPointF(xPos, barRect.center().y()),
+                          self._pulse_radius, self._pulse_radius)
+
+        if self.isChecked():
+            painter.setBrush(self.bar_checked_brush)
+            painter.drawRoundedRect(barRect, rounding, rounding)
+            painter.setBrush(self.handle_checked_brush)
+        else:
+            painter.setBrush(self.bar_brush)
+            painter.drawRoundedRect(barRect, rounding, rounding)
+            painter.setPen(Qt.GlobalColor.lightGray)
+            painter.setBrush(self.handle_brush)
+
+        painter.drawEllipse(QPointF(xPos, barRect.center().y()),
+                            handleRadius, handleRadius)
+        painter.end()
+
+    @pyqtProperty(float)
+    def handle_position(self):
+        return self._handle_position
+
+    @handle_position.setter
+    def handle_position(self, pos):
+        self._handle_position = pos
+        self.update()
+
+    @pyqtProperty(float)
+    def pulse_radius(self):
+        return self._pulse_radius
+
+    @pulse_radius.setter
+    def pulse_radius(self, pos):
+        self._pulse_radius = pos
+        self.update()
+
+
+class RoundToggleButton(QPushButton):
+    def __init__(self,
+                 parent=None, 
+                 is_dark=False,
+                 unchecked_color="#e53935", 
+                 checked_color="#66bb6a",
+                 curve_color="#1fa5f3",):
+        super().__init__(parent)
+        
+        self.animation_duration = 600  # in ms
+        self.animation_steps = 12
+        self.radius = 65
+
+        self.checked_color = QColor(checked_color)
+        self.unchecked_color = QColor(unchecked_color)
+        self.curve_color = QColor(curve_color)
+        background_color = '#eee'
+        if is_dark:
+            self.curve_color = self.curve_color.lighter(130)
+            background_color = '#212d40'
+        self.background_color = QColor(background_color)
+        self.current_color = self.unchecked_color
+        self.target_color = self.unchecked_color
+        self.animation_timer = QTimer(self)
+        self.animation_timer.timeout.connect(self.animate_color)
+        self.setCheckable(True)
+        self.clicked.connect(self.toggle_animation)
+        
+    def toggle_animation(self):
+        self.target_color = self.checked_color if self.isChecked() else self.unchecked_color
+        self.animation_timer.start(self.animation_duration // self.animation_steps)
+
+    def animate_color(self):
+        if self.current_color == self.target_color:
+            self.animation_timer.stop()
+            return
+
+        step_size = 1.0 / self.animation_steps
+        r = self.current_color.red() + int(step_size * (self.target_color.red() - self.current_color.red()))
+        g = self.current_color.green() + int(step_size * (self.target_color.green() - self.current_color.green()))
+        b = self.current_color.blue() + int(step_size * (self.target_color.blue() - self.current_color.blue()))
+        self.current_color = QColor(r, g, b)
+        self.update()
+
+    def hitButton(self, pos: QPoint): # limit the position of clickable area
+        return QRect(138, 70, 117, 115).contains(pos)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        opt = QStyleOption()
+        opt.initFrom(self)     
+        self.style().drawPrimitive(QStyle.PrimitiveElement.PE_Widget, opt, painter, self)
+        painter.setPen(Qt.GlobalColor.transparent)
+
+        radius = self.radius
+        center = QPointF(self.rect().center())
+        #draw background curves
+        painter.setBrush(QBrush(self.curve_color))
+        painter.drawEllipse(center, 500, 500)
+        painter.setBrush(QBrush(self.background_color))
+        center.setY(center.y()+90)
+        painter.drawEllipse(center, 250, 100)
+        center.setY(center.y()-90)
+        # Draw main button
+        gradient = QRadialGradient(center, radius, center)
+        gradient.setColorAt(0, self.current_color)
+        gradient.setColorAt(1, self.current_color.darker(150))
+        painter.setBrush(QBrush(gradient))
+        painter.drawEllipse(center, radius, radius)
+        #Draw the connect/disconnect text
+        painter.setPen(QColor(255, 255, 255))
+        font = painter.font()
+        font.setPointSize(12)
+        font.setBold(True)
+        painter.setFont(font)
+        text = "Connect" if not self.isChecked() else "Disconnect"
+        text_rect = QRect(0, 0, self.width(), self.height())
+        painter.drawText(text_rect, Qt.AlignmentFlag.AlignCenter, text)
+        painter.end()
+
 from PyQt6 import QtGui
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
@@ -27,8 +288,7 @@ from socket import socket, AF_INET, SOCK_STREAM
 from urllib.parse import urlparse
 from PyQt6.QtCore import QThread, QTimer,  pyqtSignal as Signal
 from urllib.parse import unquote
-from styles import *
-from CustomWidgets import *
+
 
 def wordyword(language,sentence):
     data = languages
@@ -227,7 +487,7 @@ class SingBoxWindow(QMainWindow):
         self.get_ip_thread.error.connect(self.handle_get_ip_error)
         self.check_server_thread = CheckServerThread()
         self.check_server_thread.result.connect(self.handle_check_server_result)
-        self.current_version = "v1.1.0"
+        self.current_version = "v2.2.0"
         self.setMaximumSize(500, 500)
         self.refresh_button = QPushButton(wordyword(self.language,"refresh"), self) 
         # Create widgets
@@ -706,10 +966,16 @@ class AboutDialog(QDialog):
         label2.setText("<a href='https://t.me/therealaleph'>Aleph</a>")
         label2.setOpenExternalLinks(True)
 
-        layout.addWidget(QLabel("SingBoxUI"))
+        label3 = QLabel()
+        label3.setTextFormat(Qt.TextFormat.RichText)
+        label3.setText("Special Thanks To <a href='https://github.com/m-rashvand'>m-rashvand</a>")
+        label3.setOpenExternalLinks(True)
+
+        layout.addWidget(QLabel(f"SingBoxUI - Version: {window.current_version}"))
         layout.addWidget(QLabel("By:"))
         layout.addWidget(label1)
         layout.addWidget(label2)
+        layout.addWidget(label3)
 
         self.setLayout(layout)
         self.setWindowTitle('About')
@@ -757,8 +1023,8 @@ class singbox(QThread):
                     print(f"No such process: {proc.info['pid']} ({proc.info['name']})")
                 else:
                     print(f"Process {proc.info['pid']} ({proc.info['name']}) terminated.")        
-def is_admin():
-    return True
+# def is_admin():
+#     return True
 if __name__ == "__main__":
     if is_admin():
         app = QApplication(sys.argv)
