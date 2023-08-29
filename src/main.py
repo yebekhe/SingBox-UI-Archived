@@ -70,7 +70,7 @@ QPushButton:disabled{{
 }}
 """
 
-
+from subprocess import DETACHED_PROCESS
 from PyQt6.QtGui import QColor, QBrush, QPaintEvent, QPainter, QRadialGradient
 from PyQt6.QtWidgets import QCheckBox, QPushButton, QStyleOption, QStyle
 from PyQt6.QtCore import (
@@ -487,7 +487,7 @@ class SingBoxWindow(QMainWindow):
         self.get_ip_thread.error.connect(self.handle_get_ip_error)
         self.check_server_thread = CheckServerThread()
         self.check_server_thread.result.connect(self.handle_check_server_result)
-        self.current_version = "v2.2.0"
+        self.current_version = "v2.2.1"
         self.setMaximumSize(500, 500)
         self.refresh_button = QPushButton(wordyword(self.language,"refresh"), self) 
         # Create widgets
@@ -498,6 +498,7 @@ class SingBoxWindow(QMainWindow):
         self.bearer_textbox.setText("YEBEKHE")
         self.label = QLabel(wordyword(self.language, "sublink"), self)
         self.text_box = QLineEdit(self)
+        self.text_box.setText("https://raw.githubusercontent.com/yebekhe/TelegramV2rayCollector/main/singbox/sfasfi/reality.json")
         # self.checkbox = QCheckBox(wordyword(self.language, "localconfig"), self)
         # self.vpnmode = QCheckBox(wordyword(self.language, "vpnmode"), self)
         self.localconfig_label = QLabel(wordyword(self.language, "localconfig"), self)
@@ -683,7 +684,8 @@ class SingBoxWindow(QMainWindow):
             async with session.get(url) as response:
                 parsed_url = urlparse(str(response.url))
                 version = parsed_url.path.split('/')[-1]
-                #print(version)
+                print(version)
+                
         return version
 
     def updatePrompt(self, current_version):
@@ -703,8 +705,14 @@ class SingBoxWindow(QMainWindow):
             # Set window Icon 
             update_message.setWindowIcon(icon)
             ret_val = update_message.exec()
-            if ret_val == QMessageBox.StandardButton.Yes:
-                self.open_latest_release()
+            if ret_val == QMessageBox.StandardButton.Yes: 
+                DETACHED_PROCESS = 0x00000008  
+                new_process = subprocess.Popen(['updater.exe', window.current_version], creationflags=DETACHED_PROCESS)
+
+                time.sleep(2)
+                sys.exit(0)
+                #python = sys.executable
+                #os.execl(python, python, * sys.argv)
             else:
                 return False        
 
@@ -1023,8 +1031,8 @@ class singbox(QThread):
                     print(f"No such process: {proc.info['pid']} ({proc.info['name']})")
                 else:
                     print(f"Process {proc.info['pid']} ({proc.info['name']}) terminated.")        
-# def is_admin():
-#     return True
+def is_admin():
+    return True
 if __name__ == "__main__":
     if is_admin():
         app = QApplication(sys.argv)
@@ -1035,7 +1043,7 @@ if __name__ == "__main__":
         window = SingBoxWindow()
         window.setWindowIcon(icon)
         window.show()
-        window.updatePrompt("v1.0.0")
+        window.updatePrompt("v2.2.1")
         window.raise_()
         window.activateWindow()
         sys.exit(app.exec())
