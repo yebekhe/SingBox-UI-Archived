@@ -1,4 +1,3 @@
-import asyncio
 import os
 import zipfile
 import subprocess
@@ -7,10 +6,8 @@ import sys
 import requests
 from urllib.parse import urlparse
 from PyQt6.QtWidgets import QApplication, QLabel, QVBoxLayout, QDialog
-from PyQt6.QtWidgets import QApplication, QLabel, QVBoxLayout, QDialog
-from PyQt6.QtCore import QTimer, QThread, pyqtSignal
+from PyQt6.QtCore import QThread, pyqtSignal
 from PyQt6.QtCore import QCoreApplication
-
 
 class DownloadThread(QThread):
     finished = pyqtSignal()
