@@ -556,6 +556,8 @@ class SingBoxWindow(QMainWindow):
                     print(f"Process {proc.info['pid']} ({proc.info['name']}) terminated.")
         super(SingBoxWindow, self).__init__()
         self.language = ""
+        self.is_dark = False
+        self.theme_color = 'blue'        
         cfg = configparser.ConfigParser()
         if os.path.isfile("config.ini"):
             cfg.read('config.ini')
@@ -568,13 +570,17 @@ class SingBoxWindow(QMainWindow):
             except:
                 self.language = "english"
             try:
-                self.is_dark = cfg.get('is_dark', 'Value') == 'True'
+                self.is_dark = cfg.get('is_dark', 'Value')
+                if self.is_dark == "True":
+                    self.is_dark = True
+                else:
+                    self.is_dark = False
             except:
                 self.is_dark = False
             try:
                 self.theme_color = cfg.get('color', 'Value')
             except:
-                self.theme_color = 'blue'                
+                self.theme_color = 'blue'    
         else:
             self.language = "english"
             self.is_dark = False
@@ -597,8 +603,7 @@ class SingBoxWindow(QMainWindow):
         tray_menu.addAction(open_action)
         tray_menu.addAction(quit_action)
         self.tray_icon.setContextMenu(tray_menu)
-        self.is_dark = False
-        self.theme_color = 'blue'
+
         self.get_ip_thread = GetIPThread()
         self.get_ip_thread.result.connect(self.change_ip_label)
         self.get_ip_thread.error.connect(self.handle_get_ip_error)
@@ -638,7 +643,6 @@ class SingBoxWindow(QMainWindow):
         self.dashboard_button = QPushButton(f'📃 {wordyword(self.language, "singdash")}', self)
         self.available_servers = QPushButton(wordyword(self.language, "availservers"), self)
         self.status_bar = QStatusBar()
-        # Set styling for widgets
         self.setStyleSheet(body_dark if self.is_dark else body_light)
         self.connect_button.setStyleSheet(connectButtonStyle)
         self.bearer_label.setStyleSheet(lableStyle)
@@ -657,33 +661,28 @@ class SingBoxWindow(QMainWindow):
         self.refresh_button.setStyleSheet(self.get_button_theme(self.theme_color))
         self.delete_item.setStyleSheet(self.get_button_theme(self.theme_color))
         self.delete_all.setStyleSheet(self.get_button_theme(self.theme_color))
-        # Set disable initial state for some buttons
         self.terminate_button.setEnabled(False)
         self.dashboard_button.setEnabled(False)
         self.available_servers.setEnabled(False)
         self.indicator = QLabel(self.status_bar)
         self.indicator.setMaximumSize(16, 16)
         self.green_indicator = QPixmap(16, 16)
-        self.green_indicator.fill(QColor("transparent")) # Fill with transparent color
+        self.green_indicator.fill(QColor("transparent"))
 
         painter_green = QPainter(self.green_indicator)
         painter_green.setBrush(QColor("green"))
-        painter_green.drawEllipse(0, 0, 15, 15) # Draw a circle 
+        painter_green.drawEllipse(0, 0, 15, 15)
 
         self.red_indicator = QPixmap(16, 16)
-        self.red_indicator.fill(QColor("transparent"))  # Fill with transparent color
+        self.red_indicator.fill(QColor("transparent"))
 
         painter_red = QPainter(self.red_indicator)
         painter_red.setBrush(QColor("red"))
-        painter_red.drawEllipse(0, 0, 15, 15) # Draw a circle
+        painter_red.drawEllipse(0, 0, 15, 15) 
         painter_red.end()
 
-        # Setup layout
         self.setupLayout()
 
-        # Connect signals to slots
-        # self.start_button.clicked.connect(self.run_exe)
-        # self.terminate_button.clicked.connect(self.terminate_exe)
         self.connect_button.clicked.connect(self.toggle_connect)
         self.dashboard_button.clicked.connect(lambda: self.open_link("http://127.0.0.1:9090/ui"))
         self.available_servers.clicked.connect(self.show_servers)
@@ -691,7 +690,7 @@ class SingBoxWindow(QMainWindow):
         self.delete_item.clicked.connect(self.delete_item_from_combo)
         self.delete_all.clicked.connect(self.delete_all_from_combo)
         self.setFixedSize(410,600)
-        # Read text from config file
+
         self.read_text()
         self.timer = QTimer()
         self.timer.timeout.connect(self.on_timer_timeout)
@@ -723,7 +722,7 @@ class SingBoxWindow(QMainWindow):
         colorMenu.addAction(ColorIcon(bp['bluegray'][0]), '', lambda: self.set_theme_color('bluegray'))
 
         filemenu.addAction(wordyword(self.language, "about"), self.show_about_dialog)
-
+        self.update_theme()
     def delete_item_from_combo(self):
         try:
 
@@ -810,6 +809,7 @@ class SingBoxWindow(QMainWindow):
         self.refresh_button.setStyleSheet(self.get_button_theme(self.theme_color))   
         self.delete_item.setStyleSheet(self.get_button_theme(self.theme_color))     
         self.delete_all.setStyleSheet(self.get_button_theme(self.theme_color))
+        
     def set_language(self, language):
         try:
             self.language = language
@@ -941,6 +941,7 @@ class SingBoxWindow(QMainWindow):
         return version
 
     def updatePrompt(self, current_version):
+        window.update_theme()
         self.gitversion = asyncio.run(self.check_for_update())
         if self.gitversion != current_version:
             print(self.gitversion)
@@ -1313,8 +1314,8 @@ class singbox(QThread):
                     print(f"No such process: {proc.info['pid']} ({proc.info['name']})")
                 else:
                     print(f"Process {proc.info['pid']} ({proc.info['name']}) terminated.")        
-# def is_admin():
-#     return True
+def is_admin():
+    return True
 if __name__ == "__main__":
     if is_admin():
         app = QApplication(sys.argv)
