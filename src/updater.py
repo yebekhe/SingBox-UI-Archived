@@ -19,7 +19,7 @@ class DownloadThread(QThread):
     def run(self):
         try:
             updatePrompt()
-            QCoreApplication.quit()  # <-- Try adding this line
+            QCoreApplication.quit()
         except Exception as e:
             self.error.emit(e)
         else:
@@ -60,9 +60,6 @@ def updatePrompt():
     #sys.exit(0)
     os._exit(0)
 
-
-
-
 class ProgressDialog(QDialog):
     def __init__(self):
         super().__init__()
@@ -72,8 +69,8 @@ class ProgressDialog(QDialog):
         layout = QVBoxLayout(self)
         layout.addWidget(self.label)
         self.update_thread = DownloadThread()
-        self.update_thread.finished.connect(self.finish_updating)  # Connect finished signal to a new method
-        self.update_thread.error.connect(self.handle_error)  # connect error signal to handle_error
+        self.update_thread.finished.connect(self.finish_updating)
+        self.update_thread.error.connect(self.handle_error)
         self.update_thread.start()    
 
     def handle_error(self, e):
