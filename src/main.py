@@ -609,7 +609,7 @@ class SingBoxWindow(QMainWindow):
         self.get_ip_thread.error.connect(self.handle_get_ip_error)
         self.check_server_thread = CheckServerThread()
         self.check_server_thread.result.connect(self.handle_check_server_result)
-        self.current_version = "v2.3.0"
+        self.current_version = "v2.3.1"
         self.setMaximumSize(500, 500)
         self.refresh_button = QPushButton(wordyword(self.language,"refresh"), self) 
         # Create widgets
@@ -1314,8 +1314,8 @@ class singbox(QThread):
                     print(f"No such process: {proc.info['pid']} ({proc.info['name']})")
                 else:
                     print(f"Process {proc.info['pid']} ({proc.info['name']}) terminated.")        
-def is_admin():
-    return True
+# def is_admin():
+#     return True
 if __name__ == "__main__":
     if is_admin():
         app = QApplication(sys.argv)
@@ -1335,7 +1335,7 @@ if __name__ == "__main__":
         window.raise_()
         window.setWindowState((window.windowState() & ~Qt.WindowState.WindowMinimized) | Qt.WindowState.WindowActive)
         window.activateWindow()        
-        window.updatePrompt("v2.3.0")
+        window.updatePrompt("v2.3.1")
         sys.exit(app.exec())
     else:
 
